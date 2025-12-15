@@ -10,7 +10,6 @@ git clone https://github.com/Melancholia312/fires-calculator.git
 ```
 ```
 cd fires-calculator
-
 ```
 ```
 mvn clean install
