@@ -17,3 +17,7 @@ mvn clean install
 ```
 mvn spring-boot:run
 ```
+Доступ к приложению
+```
+http://localhost:8081/
+```
