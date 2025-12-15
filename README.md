@@ -7,6 +7,8 @@
 Установка и запуск
 ```
 git clone https://github.com/Melancholia312/fires-calculator.git
+```
+```
 cd fires-calculator
 ```
 ```
