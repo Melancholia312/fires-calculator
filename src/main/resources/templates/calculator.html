@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Калькулятор пожаров на промышленном предприятии</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .calculator-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .section-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .input-group-sm {
+            max-width: 200px;
+        }
+        .chart-container {
+            height: 300px;
+            margin: 20px 0;
+        }
+        .risk-critical { color: #dc3545; font-weight: bold; }
+        .risk-high { color: #fd7e14; font-weight: bold; }
+        .risk-medium { color: #ffc107; font-weight: bold; }
+        .risk-low { color: #198754; font-weight: bold; }
+        .risk-minimal { color: #6c757d; font-weight: bold; }
+        .variable-table th {
+            background-color: #e9ecef;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="calculator-container">
+        <h1 class="text-center mb-4">🔥 Моделирование пожаров на промышленном предприятии</h1>
+        <p class="text-center text-muted mb-4">
+            Математическая модель системной динамики для оценки пожарной безопасности
+        </p>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="section-card">
+                    <h4>Параметры системы</h4>
+
+                    <form th:action="@{/simulate}" th:object="${fireModel}" method="post">
+                        <div class="table-responsive">
+                            <table class="table table-bordered variable-table">
+                                <thead>
+                                <tr>
+                                    <th>Переменная</th>
+                                    <th>Описание</th>
+                                    <th>Значение</th>
+                                    <th>Диапазон</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <!-- X1-X15 поля -->
+                                <tr>
+                                    <td>X1</td>
+                                    <td>Пожароопасность технологического процесса</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x1}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10</td>
+                                </tr>
+                                <tr>
+                                    <td>X2</td>
+                                    <td>Наличие горючих материалов (кг/м²)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x2}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-100</td>
+                                </tr>
+                                <tr>
+                                    <td>X3</td>
+                                    <td>Эффективность системы вентиляции (%)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x3}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-100</td>
+                                </tr>
+                                <tr>
+                                    <td>X4</td>
+                                    <td>Качество электрооборудования</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x4}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10</td>
+                                </tr>
+                                <tr>
+                                    <td>X5</td>
+                                    <td>Температура в помещении (°C)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x5}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">20-100</td>
+                                </tr>
+                                <tr>
+                                    <td>X6</td>
+                                    <td>Влажность воздуха (%)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x6}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-100</td>
+                                </tr>
+                                <tr>
+                                    <td>X7</td>
+                                    <td>Концентрация кислорода (%)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x7}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-25</td>
+                                </tr>
+                                <tr>
+                                    <td>X8</td>
+                                    <td>Скорость воздушных потоков (м/с)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x8}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10</td>
+                                </tr>
+                                <tr>
+                                    <td>X9</td>
+                                    <td>Уровень подготовки персонала</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x9}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10</td>
+                                </tr>
+                                <tr>
+                                    <td>X10</td>
+                                    <td>Наличие автоматических систем пожаротушения (%)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x10}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-100</td>
+                                </tr>
+                                <tr>
+                                    <td>X11</td>
+                                    <td>Состояние пожарных гидрантов (%)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x11}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-100</td>
+                                </tr>
+                                <tr>
+                                    <td>X12</td>
+                                    <td>Доступность эвакуационных путей</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x12}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10</td>
+                                </tr>
+                                <tr>
+                                    <td>X13</td>
+                                    <td>Качество пожарной сигнализации</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x13}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10</td>
+                                </tr>
+                                <tr>
+                                    <td>X14</td>
+                                    <td>Интенсивность внешних возмущений</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x14}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10</td>
+                                </tr>
+                                <tr>
+                                    <td>X15</td>
+                                    <td>Площадь помещения (м²)</td>
+                                    <td>
+                                        <div class="input-group input-group-sm">
+                                            <input type="number" step="0.1" class="form-control"
+                                                   th:field="*{x15}" required>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">0-10000</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h5>Внешние воздействия (E1-E5)</h5>
+                                <div class="mb-3">
+                                    <label class="form-label">E1 - Техногенные факторы:</label>
+                                    <input type="number" step="0.1" class="form-control"
+                                           th:field="*{e1}" min="0" max="10">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">E2 - Человеческий фактор:</label>
+                                    <input type="number" step="0.1" class="form-control"
+                                           th:field="*{e2}" min="0" max="10">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">E3 - Природные факторы:</label>
+                                    <input type="number" step="0.1" class="form-control"
+                                           th:field="*{e3}" min="0" max="10">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">E4 - Экономические факторы:</label>
+                                    <input type="number" step="0.1" class="form-control"
+                                           th:field="*{e4}" min="0" max="10">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">E5 - Организационные факторы:</label>
+                                    <input type="number" step="0.1" class="form-control"
+                                           th:field="*{e5}" min="0" max="10">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Время моделирования (мин):</label>
+                                    <input type="number" class="form-control"
+                                           th:field="*{simulationTime}" min="10" max="300">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Запустить моделирование
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div th:if="${result}" class="section-card">
+                    <h4>Результаты моделирования</h4>
+
+                    <div th:switch="${result.riskLevel}">
+                        <div th:case="'КРИТИЧЕСКИЙ'" class="alert alert-danger">
+                            <h5 class="alert-heading">Уровень риска: КРИТИЧЕСКИЙ</h5>
+                            <p class="mb-0">
+                                Максимальный риск:
+                                <strong th:text="${#numbers.formatDecimal(result.maxFireRisk, 1, 3)}">0.500</strong>
+                            </p>
+                            <p th:if="${result.timeToCritical != null and result.timeToCritical > 0}" class="mb-0">
+                                Время до критической ситуации:
+                                <strong th:text="${result.timeToCritical}">30</strong> мин
+                            </p>
+                        </div>
+                        <div th:case="'ВЫСОКИЙ'" class="alert alert-warning">
+                            <h5 class="alert-heading">Уровень риска: ВЫСОКИЙ</h5>
+                            <p class="mb-0">
+                                Максимальный риск:
+                                <strong th:text="${#numbers.formatDecimal(result.maxFireRisk, 1, 3)}">0.500</strong>
+                            </p>
+                            <p th:if="${result.timeToCritical != null and result.timeToCritical > 0}" class="mb-0">
+                                Время до критической ситуации:
+                                <strong th:text="${result.timeToCritical}">30</strong> мин
+                            </p>
+                        </div>
+                        <div th:case="'СРЕДНИЙ'" class="alert alert-info">
+                            <h5 class="alert-heading">Уровень риска: СРЕДНИЙ</h5>
+                            <p class="mb-0">
+                                Максимальный риск:
+                                <strong th:text="${#numbers.formatDecimal(result.maxFireRisk, 1, 3)}">0.500</strong>
+                            </p>
+                        </div>
+                        <div th:case="'НИЗКИЙ'" class="alert alert-success">
+                            <h5 class="alert-heading">Уровень риска: НИЗКИЙ</h5>
+                            <p class="mb-0">
+                                Максимальный риск:
+                                <strong th:text="${#numbers.formatDecimal(result.maxFireRisk, 1, 3)}">0.500</strong>
+                            </p>
+                        </div>
+                        <div th:case="*" class="alert alert-secondary">
+                            <h5 class="alert-heading">Уровень риска: МИНИМАЛЬНЫЙ</h5>
+                            <p class="mb-0">
+                                Максимальный риск:
+                                <strong th:text="${#numbers.formatDecimal(result.maxFireRisk, 1, 3)}">0.500</strong>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <h6>Ключевые показатели:</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Максимальный риск:</span>
+                                <strong th:text="${#numbers.formatDecimal(result.maxFireRisk, 1, 3)}">0</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Уровень опасности:</span>
+                                <strong th:text="${result.riskLevel}">-</strong>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>Время моделирования:</span>
+                                <strong th:text="${result.timePoints != null ? #lists.size(result.timePoints) : 0}">60</strong> мин
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="mt-3" th:if="${result.recommendations != null and not #lists.isEmpty(result.recommendations)}">
+                        <h6>Рекомендации:</h6>
+                        <ul class="list-group">
+                            <li th:each="rec : ${result.recommendations}"
+                                class="list-group-item list-group-item-warning">
+                                <span th:text="${rec}"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section-card mt-3">
+                    <h5>О модели</h5>
+                    <p class="small">
+                        Модель основана на системе дифференциальных уравнений системной динамики,
+                        учитывающей 15 переменных состояния и 5 внешних воздействий.
+                        Используется матрица инцидентности для описания взаимосвязей между параметрами.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Скрытый div для хранения данных графиков -->
+        <div th:if="${result}" style="display: none;">
+            <!-- Данные для графиков в формате JSON -->
+            <div id="chartData"
+                 th:data-time-points="${#strings.replace(#strings.replace(#strings.replace(result.timePoints.toString(), '[', ''), ']', ''), ' ', '')}"
+                 th:data-fire-risk="${#strings.replace(#strings.replace(#strings.replace(result.fireRiskLevels.toString(), '[', ''), ']', ''), ' ', '')}"
+                 th:data-temperature="${#strings.replace(#strings.replace(#strings.replace(result.temperatureValues.toString(), '[', ''), ']', ''), ' ', '')}"
+                 th:data-oxygen="${#strings.replace(#strings.replace(#strings.replace(result.oxygenConcentration.toString(), '[', ''), ']', ''), ' ', '')}">
+            </div>
+        </div>
+
+        <div th:if="${result}" class="section-card">
+            <h4>Графики динамики процесса</h4>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="riskChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="paramsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Ждем полной загрузки страницы
+    window.addEventListener('load', function() {
+        console.log('Страница загружена, проверяем наличие данных...');
+
+        // Проверяем, есть ли элемент с данными графиков
+        const chartDataElement = document.getElementById('chartData');
+
+        if (chartDataElement) {
+            console.log('Найдены данные для графиков');
+            createChartsFromData(chartDataElement);
+        } else {
+            console.log('Данных для графиков нет, возможно это первая загрузка страницы');
+
+            // Проверяем, есть ли вообще результаты на странице
+            const hasResults = document.querySelector('.alert.alert-danger, .alert.alert-warning, .alert.alert-info, .alert.alert-success, .alert.alert-secondary');
+
+            if (hasResults) {
+                console.log('Результаты есть, но данные не переданы. Создаем демо-графики.');
+                createDemoCharts();
+            }
+        }
+    });
+
+    function createChartsFromData(chartDataElement) {
+        try {
+            // Получаем данные из атрибутов
+            const timePointsStr = chartDataElement.getAttribute('data-time-points');
+            const fireRiskStr = chartDataElement.getAttribute('data-fire-risk');
+            const temperatureStr = chartDataElement.getAttribute('data-temperature');
+            const oxygenStr = chartDataElement.getAttribute('data-oxygen');
+
+            console.log('Получены строки данных:', {
+                timePointsLength: timePointsStr ? timePointsStr.length : 0,
+                fireRiskLength: fireRiskStr ? fireRiskStr.length : 0
+            });
+
+            // Преобразуем строки в массивы
+            const timePoints = timePointsStr ? timePointsStr.split(',').map(Number) : [];
+            const fireRiskLevels = fireRiskStr ? fireRiskStr.split(',').map(Number) : [];
+            const temperatureValues = temperatureStr ? temperatureStr.split(',').map(Number) : [];
+            const oxygenConcentration = oxygenStr ? oxygenStr.split(',').map(Number) : [];
+
+            console.log('Преобразованные данные:', {
+                timePoints: timePoints.length,
+                fireRiskLevels: fireRiskLevels.length,
+                temperatureValues: temperatureValues.length,
+                oxygenConcentration: oxygenConcentration.length
+            });
+
+            // Создаем графики
+            createCharts(timePoints, fireRiskLevels, temperatureValues, oxygenConcentration);
+
+        } catch (error) {
+            console.error('Ошибка при создании графиков из данных:', error);
+            createDemoCharts(); // В случае ошибки создаем демо-графики
+        }
+    }
+
+    function createCharts(timePoints, fireRiskLevels, temperatureValues, oxygenConcentration) {
+        console.log('Создаем графики с реальными данными');
+
+        // Уничтожаем старые графики, если они есть
+        if (window.riskChartInstance) {
+            window.riskChartInstance.destroy();
+        }
+        if (window.paramsChartInstance) {
+            window.paramsChartInstance.destroy();
+        }
+
+        // График пожарного риска
+        const riskCtx = document.getElementById('riskChart');
+        if (riskCtx && fireRiskLevels && fireRiskLevels.length > 0) {
+            console.log('Создаем график риска с', fireRiskLevels.length, 'точками');
+
+            window.riskChartInstance = new Chart(riskCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: timePoints,
+                    datasets: [{
+                        label: 'Уровень пожарного риска',
+                        data: fireRiskLevels,
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMin: 0,
+                            suggestedMax: 1,
+                            title: {
+                                display: true,
+                                text: 'Уровень риска',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            ticks: {
+                                stepSize: 0.1
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Время (мин)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn('Не могу создать график риска: нет данных или canvas элемента');
+        }
+
+        // График параметров
+        const paramsCtx = document.getElementById('paramsChart');
+        if (paramsCtx && temperatureValues && temperatureValues.length > 0 &&
+            oxygenConcentration && oxygenConcentration.length > 0) {
+            console.log('Создаем график параметров');
+
+            window.paramsChartInstance = new Chart(paramsCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: timePoints,
+                    datasets: [{
+                        label: 'Температура (°C)',
+                        data: temperatureValues,
+                        borderColor: 'rgb(255, 159, 64)',
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Кислород (%)',
+                        data: oxygenConcentration,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Температура (°C)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Кислород (%)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Время (мин)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    }
+                }
+            });
+        } else {
+            console.warn('Не могу создать график параметров: недостаточно данных');
+        }
+    }
+
+    function createDemoCharts() {
+        console.log('Создаем демо-графики');
+
+        // Создаем тестовые данные
+        const labels = [];
+        const fireRisk = [];
+        const temperature = [];
+        const oxygen = [];
+
+        for (let i = 0; i < 60; i++) {
+            labels.push(i);
+            // Синусоидальные данные для демонстрации
+            fireRisk.push(0.5 + 0.3 * Math.sin(i / 10));
+            temperature.push(25 + 10 * Math.sin(i / 5));
+            oxygen.push(21 - 5 * Math.sin(i / 7));
+        }
+
+        createCharts(labels, fireRisk, temperature, oxygen);
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
